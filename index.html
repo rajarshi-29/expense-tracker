@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Expense Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body
+    class="min-h-screen flex items-center justify-center bg-gray-900 text-white font-sans"
+  >
+    <div
+      class="w-full max-w-md bg-gray-800 p-6 rounded-2xl shadow-2xl border border-gray-700"
+    >
+      <h1 class="text-3xl font-bold text-center text-purple-400 mb-6">
+        💰 Expense Tracker
+      </h1>
+
+      <form id="expense-form" class="flex gap-2 mb-5">
+        <input
+          type="text"
+          id="expense-name"
+          placeholder="Expense name"
+          required
+          class="flex-1 p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-purple-500"
+        />
+        <input
+          type="number"
+          id="expense-amount"
+          placeholder="Amount"
+          required
+          class="w-28 p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-purple-500"
+        />
+        <button
+          type="submit"
+          class="bg-purple-600 hover:bg-purple-700 transition-colors px-4 py-2 rounded-lg font-semibold"
+        >
+          Add
+        </button>
+      </form>
+
+      <h2 class="text-xl font-semibold mb-3 border-b border-gray-600 pb-2">
+        Expenses
+      </h2>
+      <ul id="expense-list" class="space-y-3 mb-5">
+        <!-- Expenses will be dynamically added here -->
+      </ul>
+
+      <div
+        id="total"
+        class="bg-gray-700 p-4 rounded-lg text-center text-lg font-semibold"
+      >
+        Total: $<span id="total-amount">0.00</span>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const expenseForm = document.getElementById("expense-form");
+        const expenseNameInput = document.getElementById("expense-name");
+        const expenseAmountInput = document.getElementById("expense-amount");
+        const expenseList = document.getElementById("expense-list");
+        const totalAmountDisplay = document.getElementById("total-amount");
+
+        let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
+        let totalAmount = calculateTotal();
+
+        renderExpenses();
+        updateTotal();
+
+        expenseForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+          const name = expenseNameInput.value.trim();
+          const amount = parseFloat(expenseAmountInput.value.trim());
+
+          if (name !== "" && !isNaN(amount) && amount > 0) {
+            const newExpense = {
+              id: Date.now(),
+              name: name,
+              amount: amount,
+            };
+            expenses.push(newExpense);
+            saveExpensesToLocal();
+            renderExpenses();
+            updateTotal();
+
+            expenseNameInput.value = "";
+            expenseAmountInput.value = "";
+          }
+        });
+
+        function renderExpenses() {
+          expenseList.innerHTML = "";
+          expenses.forEach((expense) => {
+            const li = document.createElement("li");
+            li.className =
+              "flex justify-between items-center bg-gray-700 rounded-lg px-4 py-2 shadow";
+            li.innerHTML = `
+              <span>${expense.name} - <span class="text-green-400 font-semibold">$${expense.amount}</span></span>
+              <button data-id="${expense.id}" class="text-red-400 hover:text-red-500 font-medium">Delete</button>
+            `;
+            expenseList.appendChild(li);
+          });
+        }
+
+        function calculateTotal() {
+          return expenses.reduce((sum, expense) => sum + expense.amount, 0);
+        }
+
+        function saveExpensesToLocal() {
+          localStorage.setItem("expenses", JSON.stringify(expenses));
+        }
+
+        function updateTotal() {
+          totalAmount = calculateTotal();
+          totalAmountDisplay.textContent = totalAmount.toFixed(2);
+        }
+
+        expenseList.addEventListener("click", (e) => {
+          if (e.target.tagName === "BUTTON") {
+            const expenseId = parseInt(e.target.getAttribute("data-id"));
+            expenses = expenses.filter((expense) => expense.id !== expenseId);
+            saveExpensesToLocal();
+            renderExpenses();
+            updateTotal();
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
