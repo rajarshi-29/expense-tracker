@@ -1,2 +1,50 @@
-# expense-tracker
-A simple and efficient **Expense Tracker App** built using **HTML**, **CSS**, and **Vanilla JavaScript**.   This app helps you manage your expenses, track spending, and view your total balance — all stored locally in the browser.
+# Expense Tracker
+
+A simple client-side expense tracking application that allows users to add, delete, and persist expenses while computing totals in real time.
+
+🔗 **Live Demo:** https://expense-tracker-eta-blush.vercel.app/
+
+📦 **Source Code:** https://github.com/rajarshi-29/expense-tracker
+
+---
+
+## 🚀 Features
+
+- Add and delete expenses
+- Persistent storage using `localStorage`
+- Real-time calculation of total expenses
+- Form validation for user inputs
+- Responsive UI built with Tailwind CSS
+
+---
+
+## 🛠️ Tech Stack
+
+- **HTML5**
+- **Tailwind CSS**
+- **JavaScript (ES6+)**
+- **Deployment:** Vercel
+
+---
+
+## 🧠 Technical Overview
+
+- Uses an array-based data model to manage expenses.
+- Implements CRUD operations with persistent client-side storage using `localStorage`.
+- Calculates derived state (total expenses) using array reduction.
+- Updates the UI dynamically based on state changes and user interactions.
+
+---
+
+## ⚠️ Notes
+
+This is a frontend-only application built using plain HTML and JavaScript.  
+It focuses on strengthening JavaScript fundamentals, state handling, and client-side persistence.
+
+---
+
+## 👤 Author
+
+**Rajarshi Mukherjee**  
+GitHub: https://github.com/rajarshi-29  
+LinkedIn: https://linkedin.com/in/rm2904
