@@ -16,21 +16,28 @@
         💰 Expense Tracker
       </h1>
 
-      <form id="expense-form" class="flex gap-2 mb-5">
-        <input
-          type="text"
-          id="expense-name"
-          placeholder="Expense name"
-          required
-          class="flex-1 p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-purple-500"
-        />
-        <input
-          type="number"
-          id="expense-amount"
-          placeholder="Amount"
-          required
-          class="w-28 p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-purple-500"
-        />
+      <form id="expense-form" class="flex gap-2 mb-5 items-end">
+        <div class="flex-1">
+          <label for="expense-name" class="sr-only">Expense Name</label>
+          <input
+            type="text"
+            id="expense-name"
+            placeholder="Expense name"
+            required
+            class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-purple-500"
+          />
+        </div>
+        <div>
+          <label for="expense-amount" class="sr-only">Amount</label>
+          <input
+            type="number"
+            id="expense-amount"
+            placeholder="Amount"
+            required
+            step="0.01"
+            class="w-28 p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-purple-500"
+          />
+        </div>
         <button
           type="submit"
           class="bg-purple-600 hover:bg-purple-700 transition-colors px-4 py-2 rounded-lg font-semibold"
@@ -50,7 +57,7 @@
         id="total"
         class="bg-gray-700 p-4 rounded-lg text-center text-lg font-semibold"
       >
-        Total: $<span id="total-amount">0.00</span>
+        Total: <span id="total-amount">$0.00</span>
       </div>
     </div>
 
@@ -65,6 +72,12 @@
         let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
         let totalAmount = calculateTotal();
 
+        // Formatter initialization
+        const formatter = new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD',
+        });
+        
         renderExpenses();
         updateTotal();
 
@@ -91,14 +104,38 @@
 
         function renderExpenses() {
           expenseList.innerHTML = "";
+
+          if (expenses.length === 0) {
+            const emptyState = document.createElement("li");
+            emptyState.className = "text-center text-gray-500 py-4";
+            emptyState.textContent = "No expenses yet. Add one above!";
+            expenseList.appendChild(emptyState);
+            return;
+          }
+
           expenses.forEach((expense) => {
             const li = document.createElement("li");
             li.className =
               "flex justify-between items-center bg-gray-700 rounded-lg px-4 py-2 shadow";
-            li.innerHTML = `
-              <span>${expense.name} - <span class="text-green-400 font-semibold">$${expense.amount}</span></span>
-              <button data-id="${expense.id}" class="text-red-400 hover:text-red-500 font-medium">Delete</button>
-            `;
+
+            // Safe DOM creation to prevent XSS
+            const contentSpan = document.createElement("span");
+            contentSpan.textContent = `${expense.name} - `;
+            
+            const amountSpan = document.createElement("span");
+            amountSpan.className = "text-green-400 font-semibold";
+            amountSpan.textContent = formatter.format(expense.amount);
+            
+            contentSpan.appendChild(amountSpan);
+            
+            const deleteBtn = document.createElement("button");
+            deleteBtn.dataset.id = expense.id;
+            deleteBtn.className = "text-red-400 hover:text-red-500 font-medium";
+            deleteBtn.textContent = "Delete";
+            deleteBtn.ariaLabel = `Delete expense: ${expense.name}`;
+
+            li.appendChild(contentSpan);
+            li.appendChild(deleteBtn);
             expenseList.appendChild(li);
           });
         }
@@ -113,7 +150,7 @@
 
         function updateTotal() {
           totalAmount = calculateTotal();
-          totalAmountDisplay.textContent = totalAmount.toFixed(2);
+          totalAmountDisplay.textContent = formatter.format(totalAmount);
         }
 
         expenseList.addEventListener("click", (e) => {

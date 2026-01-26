@@ -14,6 +14,8 @@ A simple client-side expense tracking application that allows users to add, dele
 - Persistent storage using `localStorage`
 - Real-time calculation of total expenses
 - Form validation for user inputs
+- **Secure rendering** (XSS protection)
+- **Accessible UI** (Screen reader friendly)
 - Responsive UI built with Tailwind CSS
 
 ---
