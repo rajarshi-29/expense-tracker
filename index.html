@@ -1,168 +1,106 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Expense Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./assets/styles.css" />
   </head>
-  <body
-    class="min-h-screen flex items-center justify-center bg-gray-900 text-white font-sans"
-  >
-    <div
-      class="w-full max-w-md bg-gray-800 p-6 rounded-2xl shadow-2xl border border-gray-700"
-    >
-      <h1 class="text-3xl font-bold text-center text-purple-400 mb-6">
-        💰 Expense Tracker
-      </h1>
+  <body class="min-h-screen bg-slate-950 text-slate-100 font-sans">
+    <main class="mx-auto max-w-4xl px-4 py-10">
+      <header class="mb-8 flex flex-col gap-2">
+        <h1 class="text-3xl font-bold text-violet-300">💰 Expense Tracker</h1>
+        <p class="text-slate-300">
+          Track spending with categories, dates, filters, and instant summaries.
+        </p>
+      </header>
 
-      <form id="expense-form" class="flex gap-2 mb-5 items-end">
-        <div class="flex-1">
-          <label for="expense-name" class="sr-only">Expense Name</label>
-          <input
-            type="text"
-            id="expense-name"
-            placeholder="Expense name"
-            required
-            class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-purple-500"
-          />
+      <section class="grid gap-4 sm:grid-cols-3 mb-6" aria-label="Expense summary">
+        <article class="summary-card">
+          <h2 class="summary-title">Total Spend</h2>
+          <p id="summary-total" class="summary-value">$0.00</p>
+        </article>
+        <article class="summary-card">
+          <h2 class="summary-title">This Month</h2>
+          <p id="summary-month" class="summary-value">$0.00</p>
+        </article>
+        <article class="summary-card">
+          <h2 class="summary-title">Top Category</h2>
+          <p id="summary-category" class="summary-value">—</p>
+        </article>
+      </section>
+
+      <section class="panel mb-6" aria-labelledby="add-expense-heading">
+        <h2 id="add-expense-heading" class="section-heading">Add Expense</h2>
+
+        <form id="expense-form" class="grid gap-3 md:grid-cols-4" novalidate>
+          <div class="md:col-span-2">
+            <label for="expense-name" class="input-label">Expense name</label>
+            <input
+              id="expense-name"
+              name="name"
+              type="text"
+              required
+              maxlength="80"
+              autocomplete="off"
+              placeholder="Groceries"
+              class="input-base"
+            />
+          </div>
+          <div>
+            <label for="expense-amount" class="input-label">Amount (USD)</label>
+            <input
+              id="expense-amount"
+              name="amount"
+              type="number"
+              min="0.01"
+              step="0.01"
+              required
+              placeholder="45.90"
+              class="input-base"
+            />
+          </div>
+          <div>
+            <label for="expense-category" class="input-label">Category</label>
+            <select id="expense-category" name="category" class="input-base" required></select>
+          </div>
+          <div>
+            <label for="expense-date" class="input-label">Date</label>
+            <input id="expense-date" name="date" type="date" required class="input-base" />
+          </div>
+          <div class="md:col-span-3 flex items-end">
+            <button type="submit" class="btn-primary">Add expense</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel mb-6" aria-labelledby="filter-heading">
+        <div class="mb-3 flex items-center justify-between gap-4 flex-wrap">
+          <h2 id="filter-heading" class="section-heading mb-0">Filters</h2>
+          <button id="clear-all" type="button" class="btn-danger">Clear all expenses</button>
         </div>
-        <div>
-          <label for="expense-amount" class="sr-only">Amount</label>
-          <input
-            type="number"
-            id="expense-amount"
-            placeholder="Amount"
-            required
-            step="0.01"
-            class="w-28 p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-purple-500"
-          />
+
+        <div class="grid gap-3 sm:grid-cols-2">
+          <div>
+            <label for="filter-category" class="input-label">Filter by category</label>
+            <select id="filter-category" class="input-base"></select>
+          </div>
+          <div>
+            <label for="filter-month" class="input-label">Filter by month</label>
+            <input id="filter-month" type="month" class="input-base" />
+          </div>
         </div>
-        <button
-          type="submit"
-          class="bg-purple-600 hover:bg-purple-700 transition-colors px-4 py-2 rounded-lg font-semibold"
-        >
-          Add
-        </button>
-      </form>
+      </section>
 
-      <h2 class="text-xl font-semibold mb-3 border-b border-gray-600 pb-2">
-        Expenses
-      </h2>
-      <ul id="expense-list" class="space-y-3 mb-5">
-        <!-- Expenses will be dynamically added here -->
-      </ul>
+      <p id="status-message" class="status-message" role="status" aria-live="polite"></p>
 
-      <div
-        id="total"
-        class="bg-gray-700 p-4 rounded-lg text-center text-lg font-semibold"
-      >
-        Total: <span id="total-amount">$0.00</span>
-      </div>
-    </div>
+      <section class="panel" aria-labelledby="expense-list-heading">
+        <h2 id="expense-list-heading" class="section-heading">Expenses</h2>
+        <ul id="expense-list" class="space-y-3"></ul>
+      </section>
+    </main>
 
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const expenseForm = document.getElementById("expense-form");
-        const expenseNameInput = document.getElementById("expense-name");
-        const expenseAmountInput = document.getElementById("expense-amount");
-        const expenseList = document.getElementById("expense-list");
-        const totalAmountDisplay = document.getElementById("total-amount");
-
-        let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
-        let totalAmount = calculateTotal();
-
-        // Formatter initialization
-        const formatter = new Intl.NumberFormat('en-US', {
-          style: 'currency',
-          currency: 'USD',
-        });
-        
-        renderExpenses();
-        updateTotal();
-
-        expenseForm.addEventListener("submit", (e) => {
-          e.preventDefault();
-          const name = expenseNameInput.value.trim();
-          const amount = parseFloat(expenseAmountInput.value.trim());
-
-          if (name !== "" && !isNaN(amount) && amount > 0) {
-            const newExpense = {
-              id: Date.now(),
-              name: name,
-              amount: amount,
-            };
-            expenses.push(newExpense);
-            saveExpensesToLocal();
-            renderExpenses();
-            updateTotal();
-
-            expenseNameInput.value = "";
-            expenseAmountInput.value = "";
-          }
-        });
-
-        function renderExpenses() {
-          expenseList.innerHTML = "";
-
-          if (expenses.length === 0) {
-            const emptyState = document.createElement("li");
-            emptyState.className = "text-center text-gray-500 py-4";
-            emptyState.textContent = "No expenses yet. Add one above!";
-            expenseList.appendChild(emptyState);
-            return;
-          }
-
-          expenses.forEach((expense) => {
-            const li = document.createElement("li");
-            li.className =
-              "flex justify-between items-center bg-gray-700 rounded-lg px-4 py-2 shadow";
-
-            // Safe DOM creation to prevent XSS
-            const contentSpan = document.createElement("span");
-            contentSpan.textContent = `${expense.name} - `;
-            
-            const amountSpan = document.createElement("span");
-            amountSpan.className = "text-green-400 font-semibold";
-            amountSpan.textContent = formatter.format(expense.amount);
-            
-            contentSpan.appendChild(amountSpan);
-            
-            const deleteBtn = document.createElement("button");
-            deleteBtn.dataset.id = expense.id;
-            deleteBtn.className = "text-red-400 hover:text-red-500 font-medium";
-            deleteBtn.textContent = "Delete";
-            deleteBtn.ariaLabel = `Delete expense: ${expense.name}`;
-
-            li.appendChild(contentSpan);
-            li.appendChild(deleteBtn);
-            expenseList.appendChild(li);
-          });
-        }
-
-        function calculateTotal() {
-          return expenses.reduce((sum, expense) => sum + expense.amount, 0);
-        }
-
-        function saveExpensesToLocal() {
-          localStorage.setItem("expenses", JSON.stringify(expenses));
-        }
-
-        function updateTotal() {
-          totalAmount = calculateTotal();
-          totalAmountDisplay.textContent = formatter.format(totalAmount);
-        }
-
-        expenseList.addEventListener("click", (e) => {
-          if (e.target.tagName === "BUTTON") {
-            const expenseId = parseInt(e.target.getAttribute("data-id"));
-            expenses = expenses.filter((expense) => expense.id !== expenseId);
-            saveExpensesToLocal();
-            renderExpenses();
-            updateTotal();
-          }
-        });
-      });
-    </script>
+    <script type="module" src="./src/script.js"></script>
   </body>
 </html>
